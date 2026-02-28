@@ -7,7 +7,7 @@ Features:
 - Performance tracker (win rate + total R)
 - Auto-refresh every hour
 - Currency strength heatmap
-- Uses NewsAPI for bias (no Telegram)
+- Uses NewsAPI for bias
 """
 
 import streamlit as st
@@ -29,7 +29,6 @@ PAIRS = [
 
 NEWS_API_KEY = "628bc068ae804152a07be8cb93f86204"  # Your NewsAPI key
 AUTO_REFRESH_INTERVAL = 3600  # seconds
-
 TRADE_LOG = "trade_history.csv"
 
 # ===============================
@@ -164,10 +163,11 @@ def calculate_currency_strength(pairs):
     for p in pairs:
         df = yf.download(p,period="6mo",interval="1d",progress=False)
         if df.empty: continue
-        ret = df["Close"].pct_change().dropna().mean()
+        ret = float(df["Close"].pct_change().dropna().mean())  # FIXED: convert to float
         base = p[:3]
         strength[base] = strength.get(base,0)+ret
-    strength = {k:v for k,v in sorted(strength.items(), key=lambda item:item[1],reverse=True)}
+    # sort numerically
+    strength = {k:v for k,v in sorted(strength.items(), key=lambda item:item[1], reverse=True)}
     return strength
 
 # ===============================
